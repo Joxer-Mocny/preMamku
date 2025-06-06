@@ -3,28 +3,35 @@ package com.example.premamku.model;
 import java.util.List;
 
 public class TipResponse {
+    private List<Integer> mainNumbers;
+    private List<Integer> extraNumbers;
 
-    private List<Integer> tip;
-    private Integer additional;
-
-    public TipResponse(List<Integer> tip, Integer additional) {
-        this.tip = tip;
-        this.additional = additional;
+    public TipResponse(List<Integer> mainNumbers, List<Integer> extraNumbers) {
+        this.mainNumbers = mainNumbers;
+        this.extraNumbers = extraNumbers;
     }
 
-    public List<Integer> getTip(){
-        return tip;
+    public List<Integer> getMainNumbers() {
+        return mainNumbers;
     }
 
-    public Integer getAdditional(){
-        return additional;
+    public void setMainNumbers(List<Integer> mainNumbers) {
+        this.mainNumbers = mainNumbers;
     }
 
-    public void setTip(List<Integer> tip){
-        this.tip = tip;
+    public List<Integer> getExtraNumbers() {
+        return extraNumbers;
     }
 
-    public void setAdditional(Integer additional){
-        this.additional = additional;
+    public void setExtraNumbers(List<Integer> extraNumbers) {
+        this.extraNumbers = extraNumbers;
+    }
+
+    @Override
+    public String toString() {
+        return "TipResponse{" +
+                "mainNumbers=" + mainNumbers +
+                ", extraNumbers=" + extraNumbers +
+                '}';
     }
 }

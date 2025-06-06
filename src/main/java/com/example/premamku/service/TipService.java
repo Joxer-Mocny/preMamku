@@ -1,6 +1,8 @@
 package com.example.premamku.service;
 
+import com.example.premamku.model.LottoGameType;
 import com.example.premamku.model.TipResponse;
+import com.example.premamku.model.GenerationMode;
 import com.example.premamku.util.DataFetcher;
 import org.springframework.stereotype.Service;
 
@@ -10,36 +12,77 @@ import java.util.stream.Collectors;
 @Service
 public class TipService {
 
-    public TipResponse generateTip(String hra) {
-        List<List<Integer>> allDraws = DataFetcher.loadDrawsFromCsv();
+    public TipResponse generateTip(String gameName, String modeStr) {
+        LottoGameType gameType = LottoGameType.fromName(gameName)
+                .orElseThrow(() -> new IllegalArgumentException("Neznáma hra: " + gameName));
 
-        Map<Integer, Integer> mainNumberFrequency = new HashMap<>();
-        Map<Integer, Integer> additionaNumberFrequency = new HashMap<>();
+        GenerationMode mode = GenerationMode.valueOf(modeStr.toUpperCase());
+        List<List<Integer>> allDraws = DataFetcher.loadDrawsFromTipos(gameName);
 
-        for (List<Integer> draws : allDraws) {
-            for (int i = 0; i < draws.size(); i++) {
-                int number = draws.get(i);
-                if (i < 6) {
-                    mainNumberFrequency.put(number, mainNumberFrequency.getOrDefault(number, 0) + 1);
-                } else {
-                    additionaNumberFrequency.put(number, additionaNumberFrequency.getOrDefault(number, 0) + 1);
-                }
+        Map<Integer, Integer> frequency = new HashMap<>();
+        for (List<Integer> draw : allDraws) {
+            for (Integer number : draw) {
+                frequency.put(number, frequency.getOrDefault(number, 0) + 1);
             }
         }
 
-        // Top 6 hlavných čísel
-        List<Integer> mainNumbers = mainNumberFrequency.entrySet().stream()
-                .sorted((a, b) -> b.getValue() - a.getValue())
-                .limit(6)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
+        List<Map.Entry<Integer, Integer>> sorted = frequency.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .toList();
 
-        // Najčastejšie dodatkové číslo
-        Integer additional = additionaNumberFrequency.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey)
-                .orElse(0);
+        List<Integer> result;
 
-        return new TipResponse(mainNumbers, additional);
+        switch (mode) {
+            case FREQUENT -> result = sorted.stream()
+                    .sorted((a, b) -> b.getValue() - a.getValue())
+                    .limit(gameType.getMainCount())
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
+
+            case RARE -> result = sorted.stream()
+                    .limit(gameType.getMainCount())
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
+
+            case SMART -> {
+                int half = gameType.getMainCount() / 2;
+                List<Integer> mostCommon = sorted.stream()
+                        .sorted((a, b) -> b.getValue() - a.getValue())
+                        .limit(half * 2)
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toList());
+
+                List<Integer> leastCommon = sorted.stream()
+                        .limit(half * 2)
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toList());
+
+                Set<Integer> pool = new HashSet<>();
+                pool.addAll(mostCommon);
+                pool.addAll(leastCommon);
+
+                List<Integer> mixedPool = new ArrayList<>(pool);
+                Collections.shuffle(mixedPool);
+
+                result = mixedPool.stream()
+                        .limit(gameType.getMainCount())
+                        .sorted()
+                        .collect(Collectors.toList());
+            }
+
+            default -> throw new IllegalStateException("Nepodporovaný mód generovania");
+        }
+
+        // ✨ Výber dodatkových čísel
+        List<Integer> extraNumbers = new ArrayList<>();
+        if (gameType.getExtraCount() > 0) {
+            extraNumbers = sorted.stream()
+                    .map(Map.Entry::getKey)
+                    .filter(n -> !result.contains(n))
+                    .limit(gameType.getExtraCount())
+                    .collect(Collectors.toList());
+        }
+
+        return new TipResponse(result, extraNumbers);
     }
 }

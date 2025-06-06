@@ -2,21 +2,26 @@ package com.example.premamku.controller;
 
 import com.example.premamku.model.TipResponse;
 import com.example.premamku.service.TipService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api")
 public class TipController {
 
-    private final TipService tipService ;
+    private final TipService tipService;
 
-    public TipController(TipService tipService){
+    @Autowired
+    public TipController(TipService tipService) {
         this.tipService = tipService;
     }
 
     @GetMapping("/tip")
-    public TipResponse getTipResponse (@RequestParam String hra){
-        return tipService.generateTip(hra);
+    public ResponseEntity<TipResponse> getTip(
+            @RequestParam String game,
+            @RequestParam(defaultValue = "frequent") String mode
+    ) {
+        return ResponseEntity.ok(tipService.generateTip(game, mode));
     }
 }

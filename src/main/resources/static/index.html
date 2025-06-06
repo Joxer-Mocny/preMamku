@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generátor tipu pre mamku</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="script.js"></script>
+</head>
+<body>
+<main class="container">
+    <h1>🍀 Generátor tipu pre mamku</h1>
+
+    <label for="game">Vyber hru:</label>
+    <select id="game">
+        <option value="LOTO_1">LOTO - 1. ťah</option>
+        <option value="LOTO_2">LOTO - 2. ťah</option>
+        <option value="JOKER">JOKER</option>
+        <option value="LOTO_5_Z_35">LOTO 5 z 35</option>
+        <option value="KENO_10">KENO 10</option>
+        <option value="KENO_JOKER">KENO JOKER</option>
+        <option value="EUROMILIONY">EUROMILIONY</option>
+        <option value="EUROMILIONY_JOKER">EUROMILIONY JOKER</option>
+        <option value="EUROJACKPOT">EUROJACKPOT</option>
+        <option value="EUROJACKPOT_JOKER">EUROJACKPOT JOKER</option>
+        <option value="EXTRA_VYPLATA">Extra výplata</option>
+    </select>
+
+    <label for="mode">Režim:</label>
+    <select id="mode">
+        <option value="frequent">Najčastejšie čísla</option>
+        <option value="rare">Najmenej časté čísla</option>
+        <option value="smart">Smart výber</option>
+    </select>
+
+    <button onclick="generateTip()">Vygeneruj tip</button>
+    <button onclick="generateUnseenCombinations()">🎯 Špeciál LOTO 5 z 35 – Nepadnuté kombinácie</button>
+
+    <div class="result" id="result"></div>
+</main>
+</body>
+</html>
